@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npm init:*)",
+      "Bash(npm pkg set:*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest add button card input label table tabs dialog dropdown-menu separator sheet skeleton toast textarea select badge form --yes)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx prisma init:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx next build)",
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\(''./node_modules/next-auth/package.json''\\).exports\\).slice\\(0,10\\)\\)\")",
+      "Bash(npx dotenv:*)",
+      "Bash(ls:*)",
+      "Bash(npm run build:*)",
+      "Bash(identify:*)",
+      "Bash(while read file)",
+      "Bash(do grep -l \"Image\\\\|favicon\" \"$file\")",
+      "Bash(done)",
+      "Bash(xargs:*)",
+      "Bash(cat:*)",
+      "Bash(vercel --version:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
