@@ -1,7 +1,9 @@
 import { Resend } from "resend";
 import { APP_NAME, APP_URL } from "@/lib/constants";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 const from = process.env.EMAIL_FROM || `${APP_NAME} <noreply@eliasimmersive.com>`;
 
 export async function sendInviteEmail(
@@ -11,7 +13,7 @@ export async function sendInviteEmail(
 ) {
   const inviteUrl = `${APP_URL}/invite/${token}`;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from,
     to,
     subject: `You're invited to ${APP_NAME}`,
@@ -46,7 +48,7 @@ export async function sendInviteEmail(
 export async function sendWelcomeEmail(to: string, firstName: string) {
   const dashboardUrl = `${APP_URL}/dashboard`;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from,
     to,
     subject: `Welcome to ${APP_NAME}`,
@@ -75,7 +77,7 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
 export async function sendPasswordResetEmail(to: string, token: string) {
   const resetUrl = `${APP_URL}/reset-password/${token}`;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from,
     to,
     subject: `Reset your ${APP_NAME} password`,
