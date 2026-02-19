@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { signOut } from "next-auth/react";
+import { FeatureKey } from "@prisma/client";
 
 interface DashboardShellProps {
   user: {
@@ -13,10 +14,11 @@ interface DashboardShellProps {
     email: string;
     role: "ADMIN" | "CUSTOMER";
   };
+  enabledFeatures?: FeatureKey[];
   children: React.ReactNode;
 }
 
-export function DashboardShell({ user, children }: DashboardShellProps) {
+export function DashboardShell({ user, enabledFeatures = [], children }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
 
@@ -29,6 +31,7 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
     <div className="flex min-h-screen">
       <Sidebar
         user={user}
+        enabledFeatures={enabledFeatures}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onSignOut={handleSignOut}

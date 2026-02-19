@@ -1,5 +1,7 @@
 import { requireAuth } from "@/lib/auth-guard";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { getOrgFeatures } from "@/lib/features";
+import { FeatureKey } from "@prisma/client";
 
 export default async function DashboardLayout({
   children,
@@ -7,6 +9,11 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await requireAuth();
+
+  let enabledFeatures: FeatureKey[] = [];
+  if (session.user.organizationId) {
+    enabledFeatures = await getOrgFeatures(session.user.organizationId);
+  }
 
   return (
     <DashboardShell
@@ -16,6 +23,7 @@ export default async function DashboardLayout({
         email: session.user.email,
         role: session.user.role,
       }}
+      enabledFeatures={enabledFeatures}
     >
       {children}
     </DashboardShell>

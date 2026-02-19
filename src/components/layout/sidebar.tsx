@@ -11,8 +11,11 @@ import {
   Settings,
   LogOut,
   X,
+  BarChart3,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FeatureKey } from "@prisma/client";
 
 interface SidebarProps {
   user: {
@@ -21,26 +24,42 @@ interface SidebarProps {
     email: string;
     role: "ADMIN" | "CUSTOMER";
   };
+  enabledFeatures?: FeatureKey[];
   open: boolean;
   onClose: () => void;
   onSignOut: () => void;
 }
 
-const adminLinks = [
+interface NavLink {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  requiredFeature?: FeatureKey;
+}
+
+const adminLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-const customerLinks = [
+const customerLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/properties", label: "Properties", icon: Building2 },
+  { href: "/analytics", label: "Analytics", icon: BarChart3, requiredFeature: "ANALYTICS" as FeatureKey },
+  { href: "/inventory", label: "Inventory", icon: Package, requiredFeature: "INVENTORY" as FeatureKey },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function Sidebar({ user, open, onClose, onSignOut }: SidebarProps) {
+export function Sidebar({ user, enabledFeatures = [], open, onClose, onSignOut }: SidebarProps) {
   const pathname = usePathname();
-  const links = user.role === "ADMIN" ? adminLinks : customerLinks;
+  const allLinks = user.role === "ADMIN" ? adminLinks : customerLinks;
+
+  // Filter links based on enabled features
+  const links = allLinks.filter((link) => {
+    if (!link.requiredFeature) return true;
+    return enabledFeatures.includes(link.requiredFeature);
+  });
 
   return (
     <>

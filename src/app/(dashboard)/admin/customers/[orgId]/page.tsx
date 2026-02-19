@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   User,
   ScanLine,
+  Sparkles,
 } from "lucide-react";
 
 export async function generateMetadata({
@@ -50,12 +51,20 @@ export default async function CustomerDetailPage({
             {customer.name}
           </h1>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/admin/customers/${orgId}/edit`}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/admin/customers/${orgId}/features`}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Features
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/admin/customers/${orgId}/edit`}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Customer Info */}

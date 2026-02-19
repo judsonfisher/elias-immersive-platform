@@ -123,3 +123,41 @@ export const phoneVerificationSchema = z.object({
 export const verifyCodeSchema = z.object({
   code: z.string().length(6, "Code must be 6 digits"),
 });
+
+// ─── Asset Inventory ────────────────────────────────────────────────
+
+export const assetItemSchema = z.object({
+  roomName: z.string().min(1, "Room name is required").max(255),
+  category: z.enum([
+    "FURNITURE",
+    "ELECTRONICS",
+    "APPLIANCE",
+    "FIXTURE",
+    "ART",
+    "JEWELRY",
+    "CLOTHING",
+    "OTHER",
+  ]),
+  name: z.string().min(1, "Asset name is required").max(255),
+  description: z.string().max(2000).optional().or(z.literal("")),
+  brand: z.string().max(255).optional().or(z.literal("")),
+  model: z.string().max(255).optional().or(z.literal("")),
+  serialNumber: z.string().max(255).optional().or(z.literal("")),
+  purchaseDate: z.string().optional().or(z.literal("")),
+  purchasePrice: z.coerce.number().min(0).optional(),
+  estimatedValue: z.coerce.number().min(0).optional(),
+  condition: z.enum(["EXCELLENT", "GOOD", "FAIR", "POOR"]),
+  notes: z.string().max(5000).optional().or(z.literal("")),
+});
+
+// ─── Export ─────────────────────────────────────────────────────────
+
+export const exportRequestSchema = z.object({
+  type: z.enum([
+    "INVENTORY_PDF",
+    "INVENTORY_CSV",
+    "ANALYTICS_PDF",
+    "ANALYTICS_CSV",
+  ]),
+  propertyId: z.string().min(1, "Property is required"),
+});

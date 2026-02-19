@@ -26,6 +26,58 @@ enum ScanType {
   NIRA
 }
 
+enum FeatureKey {
+  ANALYTICS
+  INVENTORY
+}
+
+enum ScanEventType {
+  MOVE
+  ZOOM
+  TAG_CLICK
+  HOTSPOT_CLICK
+  DWELL
+}
+
+enum HeatmapTimeRange {
+  DAY
+  WEEK
+  MONTH
+  ALL
+}
+
+enum AssetCategory {
+  FURNITURE
+  ELECTRONICS
+  APPLIANCE
+  FIXTURE
+  ART
+  JEWELRY
+  CLOTHING
+  OTHER
+}
+
+enum AssetCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+}
+
+enum ExportType {
+  INVENTORY_PDF
+  INVENTORY_CSV
+  ANALYTICS_PDF
+  ANALYTICS_CSV
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 // ─── USER ────────────────────────────────────────────────────────────
 
 model User {
@@ -70,6 +122,8 @@ model Organization {
   users      User[]
   properties Property[]
   invites    Invite[]
+  features   OrganizationFeature[]
+  exports    ExportJob[]
 
   @@index([slug])
   @@map("organizations")
@@ -94,7 +148,9 @@ model Property {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
 
-  scans Scan[]
+  scans   Scan[]
+  assets  AssetItem[]
+  exports ExportJob[]
 
   @@index([organizationId])
   @@map("properties")
@@ -115,6 +171,10 @@ model Scan {
 
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId String
+
+  sessions ScanSession[]
+  tags     ScanTag[]
+  heatmaps HeatmapSnapshot[]
 
   @@index([propertyId])
   @@map("scans")
@@ -168,6 +228,182 @@ model PhoneVerification {
 
   @@index([userId])
   @@map("phone_verifications")
+}
+
+// ─── ORGANIZATION FEATURE (FEATURE GATING) ──────────────────────────
+
+model OrganizationFeature {
+  id             String     @id @default(cuid())
+  featureKey     FeatureKey
+  enabledAt      DateTime   @default(now())
+  enabledBy      String?
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  @@unique([organizationId, featureKey])
+  @@index([organizationId])
+  @@map("organization_features")
+}
+
+// ─── SCAN SESSION (ANALYTICS) ───────────────────────────────────────
+
+model ScanSession {
+  id         String    @id @default(cuid())
+  visitorId  String
+  startedAt  DateTime  @default(now())
+  endedAt    DateTime?
+  duration   Int?
+  deviceType String?
+  entryPoint String?
+  totalMoves Int       @default(0)
+  totalZooms Int       @default(0)
+
+  scan   Scan   @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  scanId String
+
+  events ScanEvent[]
+
+  @@index([scanId])
+  @@index([startedAt])
+  @@map("scan_sessions")
+}
+
+// ─── SCAN EVENT (ANALYTICS) ─────────────────────────────────────────
+
+model ScanEvent {
+  id        String        @id @default(cuid())
+  type      ScanEventType
+  timestamp DateTime      @default(now())
+  positionX Float?
+  positionY Float?
+  positionZ Float?
+  targetId  String?
+  metadata  Json?
+  duration  Float?
+
+  session   ScanSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String
+
+  @@index([sessionId])
+  @@index([type])
+  @@map("scan_events")
+}
+
+// ─── SCAN TAG (ANALYTICS) ───────────────────────────────────────────
+
+model ScanTag {
+  id             String  @id @default(cuid())
+  tagId          String
+  label          String
+  category       String?
+  positionX      Float?
+  positionY      Float?
+  positionZ      Float?
+  totalClicks    Int     @default(0)
+  totalDwellTime Float   @default(0)
+  isActive       Boolean @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  scan   Scan   @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  scanId String
+
+  @@unique([scanId, tagId])
+  @@index([scanId])
+  @@map("scan_tags")
+}
+
+// ─── HEATMAP SNAPSHOT (ANALYTICS) ───────────────────────────────────
+
+model HeatmapSnapshot {
+  id          String           @id @default(cuid())
+  generatedAt DateTime         @default(now())
+  timeRange   HeatmapTimeRange
+  dataPoints  Json
+  peakZones   Json?
+
+  scan   Scan   @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  scanId String
+
+  @@index([scanId])
+  @@index([timeRange])
+  @@map("heatmap_snapshots")
+}
+
+// ─── ASSET ITEM (INVENTORY) ─────────────────────────────────────────
+
+model AssetItem {
+  id             String         @id @default(cuid())
+  roomName       String
+  category       AssetCategory
+  name           String
+  description    String?
+  brand          String?
+  model          String?
+  serialNumber   String?
+  purchaseDate   DateTime?
+  purchasePrice  Float?
+  estimatedValue Float?
+  condition      AssetCondition @default(GOOD)
+  notes          String?
+  positionX      Float?
+  positionY      Float?
+  positionZ      Float?
+  scanTagId      String?
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+
+  photos AssetPhoto[]
+
+  @@index([propertyId])
+  @@index([roomName])
+  @@index([category])
+  @@map("asset_items")
+}
+
+// ─── ASSET PHOTO (INVENTORY) ────────────────────────────────────────
+
+model AssetPhoto {
+  id        String  @id @default(cuid())
+  url       String
+  caption   String?
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
+  createdAt DateTime @default(now())
+
+  assetItem   AssetItem @relation(fields: [assetItemId], references: [id], onDelete: Cascade)
+  assetItemId String
+
+  @@index([assetItemId])
+  @@map("asset_photos")
+}
+
+// ─── EXPORT JOB ─────────────────────────────────────────────────────
+
+model ExportJob {
+  id           String       @id @default(cuid())
+  type         ExportType
+  status       ExportStatus @default(PENDING)
+  fileUrl      String?
+  requestedBy  String
+  requestedAt  DateTime     @default(now())
+  completedAt  DateTime?
+  metadata     Json?
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  propertyId String?
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("export_jobs")
 }
 
 // ─── AUTH.JS REQUIRED TABLES ─────────────────────────────────────────
