@@ -68,4 +68,28 @@ export const FEATURE_METADATA: Record<
       "Room-by-room asset cataloging with photos, conditions, values, and export to PDF/CSV for insurance documentation.",
     icon: "Package",
   },
+  SHARE_LINKS: {
+    label: "Shareable Links",
+    description:
+      "Generate expiring links to share property scans with external stakeholders without requiring login.",
+    icon: "Link",
+  },
+  ANNOTATIONS: {
+    label: "3D Annotations",
+    description:
+      "Pin notes, comments, and issues to specific 3D coordinates in scans for collaboration.",
+    icon: "MessageSquarePlus",
+  },
+  EMBED_WIDGET: {
+    label: "Embed Widget",
+    description:
+      "Generate embeddable iframe snippets for your website with analytics passthrough.",
+    icon: "Code",
+  },
+  SCHEDULED_REPORTS: {
+    label: "Scheduled Reports",
+    description:
+      "Automated weekly or monthly email digests with analytics summaries delivered to your team.",
+    icon: "CalendarClock",
+  },
 };

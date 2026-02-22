@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth-guard";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { getOrgFeatures } from "@/lib/features";
 import { FeatureKey } from "@prisma/client";
+import { MatterportSdkLoader } from "@/components/dashboard/matterport-sdk-loader";
 
 export default async function DashboardLayout({
   children,
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
       }}
       enabledFeatures={enabledFeatures}
     >
+      <MatterportSdkLoader />
       {children}
     </DashboardShell>
   );

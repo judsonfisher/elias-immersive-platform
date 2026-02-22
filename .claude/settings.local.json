@@ -30,7 +30,27 @@
       "Bash(vercel ls:*)",
       "Bash(vercel env add:*)",
       "Bash(echo:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(vercel domains add:*)",
+      "Bash(vercel domains:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo list:*)",
+      "Bash(gh api:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:matterport.github.io)",
+      "WebFetch(domain:support.matterport.com)",
+      "WebFetch(domain:matterport.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm run db:seed:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(git status:*)"
     ]
   }
 }

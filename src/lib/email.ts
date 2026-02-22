@@ -74,6 +74,44 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
   });
 }
 
+export async function sendShareLinkEmail(
+  to: string,
+  propertyName: string,
+  shareUrl: string,
+  senderName: string
+) {
+  await getResend().emails.send({
+    from,
+    to,
+    subject: `${senderName} shared a property with you — ${APP_NAME}`,
+    html: `
+      <div style="font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h1 style="font-size: 24px; color: #1a1a1a; margin: 0;">Property Shared With You</h1>
+        </div>
+        <p style="font-size: 16px; color: #1a1a1a; line-height: 1.6;">
+          <strong>${senderName}</strong> has shared the digital twin for <strong>${propertyName}</strong> with you.
+        </p>
+        <p style="font-size: 16px; color: #666666; line-height: 1.6;">
+          Click below to explore the interactive 3D scan — no account required.
+        </p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${shareUrl}" style="display: inline-block; background-color: #4a5440; color: white; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-size: 14px; font-weight: 500;">
+            View Property
+          </a>
+        </div>
+        <p style="font-size: 13px; color: #999999; line-height: 1.6;">
+          This link may expire. If you can't access it, ask ${senderName} to send a new one.
+        </p>
+        <hr style="border: none; border-top: 1px solid #e0e0dc; margin: 32px 0;" />
+        <p style="font-size: 12px; color: #999999; text-align: center;">
+          ${APP_NAME} — Precision Capture. Interactive Results.
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendPasswordResetEmail(to: string, token: string) {
   const resetUrl = `${APP_URL}/reset-password/${token}`;
 
@@ -103,5 +141,18 @@ export async function sendPasswordResetEmail(to: string, token: string) {
         </p>
       </div>
     `,
+  });
+}
+
+export async function sendReportEmail(
+  to: string,
+  subject: string,
+  htmlBody: string
+) {
+  await getResend().emails.send({
+    from,
+    to,
+    subject,
+    html: htmlBody,
   });
 }

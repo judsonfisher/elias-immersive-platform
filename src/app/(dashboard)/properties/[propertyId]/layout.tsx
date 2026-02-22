@@ -82,6 +82,9 @@ export default async function PropertyLayout({
             {address}
           </p>
         )}
+        <p className="mt-1 text-xs text-muted-foreground">
+          ID: <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{property.id}</code>
+        </p>
       </div>
 
       {/* Tab navigation */}

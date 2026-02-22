@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteScan } from "@/actions/scans";
+import { syncTagsForScan } from "@/actions/tag-sync";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ScanLine, Trash2, Pencil, ExternalLink, Loader2 } from "lucide-react";
+import { ScanLine, Trash2, Pencil, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 interface Scan {
@@ -63,6 +64,7 @@ function ScanRow({
 }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   async function handleDelete() {
@@ -70,6 +72,18 @@ function ScanRow({
     await deleteScan(scan.id);
     setDialogOpen(false);
     router.refresh();
+  }
+
+  async function handleSyncTags() {
+    setSyncing(true);
+    try {
+      const result = await syncTagsForScan(scan.id);
+      if (result.success) {
+        router.refresh();
+      }
+    } finally {
+      setSyncing(false);
+    }
   }
 
   return (
@@ -89,6 +103,19 @@ function ScanRow({
         </div>
       </div>
       <div className="flex items-center gap-1">
+        {scan.type === "MATTERPORT" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSyncTags}
+            disabled={syncing}
+            title="Sync tags from Matterport"
+            className="gap-1.5 text-xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Sync Tags</span>
+          </Button>
+        )}
         <Button variant="ghost" size="icon" asChild>
           <a
             href={scan.embedUrl}

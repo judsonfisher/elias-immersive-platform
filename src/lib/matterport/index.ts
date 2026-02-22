@@ -1,4 +1,5 @@
 export { getMatterportSDK, isMockMode } from "./provider";
+export { extractMatterportSid, buildShowcaseUrl } from "./utils";
 export type {
   MatterportSDK,
   Position3D,

@@ -39,11 +39,16 @@ export default async function middleware(req: NextRequest) {
   const isResetRoute = pathname.startsWith("/reset-password");
   const isAuthApi = pathname.startsWith("/api/auth");
 
+  const isShareRoute = pathname.startsWith("/share");
+  const isEmbedRoute = pathname.startsWith("/embed");
+
   // Allow API auth routes
   if (isAuthApi) return NextResponse.next();
 
-  // Allow invite and reset-password routes (they have their own token validation)
-  if (isInviteRoute || isResetRoute) return NextResponse.next();
+  // Allow public routes with their own token/key validation
+  if (isInviteRoute || isResetRoute || isShareRoute || isEmbedRoute) {
+    return NextResponse.next();
+  }
 
   const token = await getToken(req);
   const isLoggedIn = !!token;

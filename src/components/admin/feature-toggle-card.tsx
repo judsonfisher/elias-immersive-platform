@@ -4,7 +4,14 @@ import { useState, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, Package } from "lucide-react";
+import {
+  BarChart3,
+  Package,
+  Link,
+  MessageSquarePlus,
+  Code,
+  CalendarClock,
+} from "lucide-react";
 import { enableFeature, disableFeature } from "@/actions/features";
 import { FeatureKey } from "@prisma/client";
 import { FEATURE_METADATA } from "@/lib/features";
@@ -12,6 +19,10 @@ import { FEATURE_METADATA } from "@/lib/features";
 const iconMap = {
   BarChart3,
   Package,
+  Link,
+  MessageSquarePlus,
+  Code,
+  CalendarClock,
 } as const;
 
 interface FeatureToggleCardProps {

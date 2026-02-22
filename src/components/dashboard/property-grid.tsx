@@ -69,7 +69,10 @@ export function PropertyGrid({ properties }: { properties: Property[] }) {
                     {property.address}
                   </p>
                 )}
-                <div className="mt-3 flex items-center gap-1.5">
+                <p className="mt-2 font-mono text-[10px] text-muted-foreground/60 truncate">
+                  ID: {property.id}
+                </p>
+                <div className="mt-1.5 flex items-center gap-1.5">
                   <ScanLine className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
                     {property._count.scans} scan

@@ -29,6 +29,26 @@ enum ScanType {
 enum FeatureKey {
   ANALYTICS
   INVENTORY
+  SHARE_LINKS
+  ANNOTATIONS
+  EMBED_WIDGET
+  SCHEDULED_REPORTS
+}
+
+enum AnnotationType {
+  NOTE
+  ISSUE
+  COMMENT
+}
+
+enum AnnotationStatus {
+  OPEN
+  RESOLVED
+}
+
+enum ReportFrequency {
+  WEEKLY
+  MONTHLY
 }
 
 enum ScanEventType {
@@ -97,8 +117,10 @@ model User {
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String?
 
-  accounts Account[]
-  sessions Session[]
+  accounts          Account[]
+  sessions          Session[]
+  shareLinksCreated ShareLink[]  @relation("ShareLinksCreated")
+  annotationsCreated Annotation[] @relation("AnnotationsCreated")
 
   @@index([email])
   @@index([organizationId])
@@ -119,11 +141,12 @@ model Organization {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  users      User[]
-  properties Property[]
-  invites    Invite[]
-  features   OrganizationFeature[]
-  exports    ExportJob[]
+  users           User[]
+  properties      Property[]
+  invites         Invite[]
+  features        OrganizationFeature[]
+  exports         ExportJob[]
+  reportSchedules ReportSchedule[]
 
   @@index([slug])
   @@map("organizations")
@@ -148,9 +171,12 @@ model Property {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
 
-  scans   Scan[]
-  assets  AssetItem[]
-  exports ExportJob[]
+  scans           Scan[]
+  assets          AssetItem[]
+  exports         ExportJob[]
+  shareLinks      ShareLink[]
+  embedConfigs    EmbedConfig[]
+  reportSchedules ReportSchedule[]
 
   @@index([organizationId])
   @@map("properties")
@@ -162,8 +188,9 @@ model Scan {
   id          String   @id @default(cuid())
   name        String
   type        ScanType
-  embedUrl    String
-  description String?
+  embedUrl      String
+  matterportSid String?
+  description   String?
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -172,9 +199,10 @@ model Scan {
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId String
 
-  sessions ScanSession[]
-  tags     ScanTag[]
-  heatmaps HeatmapSnapshot[]
+  sessions    ScanSession[]
+  tags        ScanTag[]
+  heatmaps    HeatmapSnapshot[]
+  annotations Annotation[]
 
   @@index([propertyId])
   @@map("scans")
@@ -404,6 +432,103 @@ model ExportJob {
   @@index([organizationId])
   @@index([status])
   @@map("export_jobs")
+}
+
+// ─── SHARE LINK ─────────────────────────────────────────────────────
+
+model ShareLink {
+  id             String    @id @default(cuid())
+  token          String    @unique
+  passwordHash   String?
+  expiresAt      DateTime
+  maxViews       Int?
+  accessCount    Int       @default(0)
+  lastAccessedAt DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+
+  createdBy   User   @relation("ShareLinksCreated", fields: [createdById], references: [id])
+  createdById String
+
+  @@index([token])
+  @@index([propertyId])
+  @@map("share_links")
+}
+
+// ─── ANNOTATION ─────────────────────────────────────────────────────
+
+model Annotation {
+  id        String           @id @default(cuid())
+  content   String
+  type      AnnotationType
+  status    AnnotationStatus @default(OPEN)
+  color     String           @default("#ef4444")
+  positionX Float
+  positionY Float
+  positionZ Float
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  scan     Scan   @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  scanId   String
+
+  author   User   @relation("AnnotationsCreated", fields: [authorId], references: [id])
+  authorId String
+
+  @@index([scanId])
+  @@index([authorId])
+  @@index([type])
+  @@index([status])
+  @@map("annotations")
+}
+
+// ─── EMBED CONFIG ───────────────────────────────────────────────────
+
+model EmbedConfig {
+  id             String   @id @default(cuid())
+  apiKey         String   @unique
+  allowedDomains String[]
+  brandingColor  String?
+  showLogo       Boolean  @default(true)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+
+  @@index([apiKey])
+  @@index([propertyId])
+  @@map("embed_configs")
+}
+
+// ─── REPORT SCHEDULE ────────────────────────────────────────────────
+
+model ReportSchedule {
+  id         String          @id @default(cuid())
+  frequency  ReportFrequency
+  recipients String[]
+  lastSentAt DateTime?
+  nextSendAt DateTime
+  isActive   Boolean         @default(true)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  propertyId String?
+
+  @@index([organizationId])
+  @@index([nextSendAt])
+  @@index([isActive])
+  @@map("report_schedules")
 }
 
 // ─── AUTH.JS REQUIRED TABLES ─────────────────────────────────────────

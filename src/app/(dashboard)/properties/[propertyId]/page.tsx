@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
+import { getOrgFeatures } from "@/lib/features";
 import { EnhancedScanViewer } from "@/components/dashboard/enhanced-scan-viewer";
+import { ScanViewerWithAnnotations } from "@/components/dashboard/scan-viewer-with-annotations";
 import { isMockMode } from "@/lib/matterport";
 import { ScanLine } from "lucide-react";
 
@@ -44,16 +46,61 @@ export default async function CustomerPropertyPage({
 
   if (!property) notFound();
 
+  // Check if annotations feature is enabled
+  const features = await getOrgFeatures(property.organizationId);
+  const hasAnnotations = features.includes("ANNOTATIONS");
+
+  // Fetch annotations for all scans if feature is enabled
+  let annotations: {
+    id: string;
+    content: string;
+    type: "NOTE" | "ISSUE" | "COMMENT";
+    status: "OPEN" | "RESOLVED";
+    color: string;
+    positionX: number;
+    positionY: number;
+    positionZ: number;
+    createdAt: Date;
+    author: { firstName: string; lastName: string };
+    scanId: string;
+  }[] = [];
+
+  if (hasAnnotations) {
+    annotations = await prisma.annotation.findMany({
+      where: {
+        isActive: true,
+        scan: {
+          propertyId,
+          isActive: true,
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: { select: { firstName: true, lastName: true } },
+      },
+    });
+  }
+
   return (
     <>
       {/* Scan Viewer */}
       {property.scans.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-border">
-          <EnhancedScanViewer
-            scans={property.scans}
-            propertyName={property.name}
-            isMock={isMockMode()}
-          />
+          {hasAnnotations ? (
+            <ScanViewerWithAnnotations
+              scans={property.scans}
+              propertyName={property.name}
+              isMock={isMockMode()}
+              annotations={annotations}
+              showAnnotations
+            />
+          ) : (
+            <EnhancedScanViewer
+              scans={property.scans}
+              propertyName={property.name}
+              isMock={isMockMode()}
+            />
+          )}
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card p-12 text-center">

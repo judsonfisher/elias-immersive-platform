@@ -22,3 +22,10 @@ export const ALLOWED_EMBED_DOMAINS = [
 
 // Bcrypt salt rounds
 export const BCRYPT_SALT_ROUNDS = 10;
+
+// Share link defaults
+export const SHARE_LINK_DEFAULT_EXPIRY_DAYS = 7;
+export const SHARE_LINK_MAX_EXPIRY_DAYS = 90;
+
+// Embed widget
+export const EMBED_API_KEY_LENGTH = 32;

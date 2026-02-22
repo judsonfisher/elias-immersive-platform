@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ScanLine, BarChart3, Package, Download } from "lucide-react";
+import {
+  ScanLine,
+  BarChart3,
+  Package,
+  Download,
+  Link as LinkIcon,
+  MessageSquarePlus,
+  Code,
+  CalendarClock,
+} from "lucide-react";
 import type { FeatureKey } from "@prisma/client";
 
 interface PropertyTabsProps {
@@ -40,6 +49,30 @@ export function PropertyTabs({ propertyId, enabledFeatures }: PropertyTabsProps)
       requiredFeature: "INVENTORY" as FeatureKey,
     },
     {
+      href: `${basePath}/share`,
+      label: "Share",
+      icon: LinkIcon,
+      requiredFeature: "SHARE_LINKS" as FeatureKey,
+    },
+    {
+      href: `${basePath}/annotations`,
+      label: "Annotations",
+      icon: MessageSquarePlus,
+      requiredFeature: "ANNOTATIONS" as FeatureKey,
+    },
+    {
+      href: `${basePath}/embed`,
+      label: "Embed",
+      icon: Code,
+      requiredFeature: "EMBED_WIDGET" as FeatureKey,
+    },
+    {
+      href: `${basePath}/reports`,
+      label: "Reports",
+      icon: CalendarClock,
+      requiredFeature: "SCHEDULED_REPORTS" as FeatureKey,
+    },
+    {
       href: `${basePath}/exports`,
       label: "Exports",
       icon: Download,
@@ -55,6 +88,13 @@ export function PropertyTabs({ propertyId, enabledFeatures }: PropertyTabsProps)
         return enabledFeatures.length > 0;
       }
       return true;
+    }
+    // Reports requires both ANALYTICS and SCHEDULED_REPORTS
+    if (tab.label === "Reports") {
+      return (
+        enabledFeatures.includes("ANALYTICS" as FeatureKey) &&
+        enabledFeatures.includes("SCHEDULED_REPORTS" as FeatureKey)
+      );
     }
     return enabledFeatures.includes(tab.requiredFeature);
   });

@@ -161,3 +161,46 @@ export const exportRequestSchema = z.object({
   ]),
   propertyId: z.string().min(1, "Property is required"),
 });
+
+// ─── Share Links ────────────────────────────────────────────────────
+
+export const createShareLinkSchema = z.object({
+  propertyId: z.string().min(1, "Property is required"),
+  expiresInDays: z.coerce.number().min(1).max(90).default(7),
+  password: z.string().min(4, "Password must be at least 4 characters").max(128).optional().or(z.literal("")),
+  maxViews: z.coerce.number().min(1).max(10000).optional(),
+});
+
+// ─── Annotations ────────────────────────────────────────────────────
+
+export const createAnnotationSchema = z.object({
+  scanId: z.string().min(1),
+  content: z.string().min(1, "Content is required").max(2000),
+  type: z.enum(["NOTE", "ISSUE", "COMMENT"]),
+  positionX: z.number(),
+  positionY: z.number(),
+  positionZ: z.number(),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+});
+
+export const updateAnnotationSchema = z.object({
+  content: z.string().min(1).max(2000).optional(),
+  status: z.enum(["OPEN", "RESOLVED"]).optional(),
+});
+
+// ─── Embed Config ───────────────────────────────────────────────────
+
+export const createEmbedConfigSchema = z.object({
+  propertyId: z.string().min(1, "Property is required"),
+  allowedDomains: z.array(z.string().min(1)).min(1, "At least one domain is required").max(10),
+  brandingColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
+  showLogo: z.boolean().optional(),
+});
+
+// ─── Report Schedule ────────────────────────────────────────────────
+
+export const createReportScheduleSchema = z.object({
+  propertyId: z.string().optional().or(z.literal("")),
+  frequency: z.enum(["WEEKLY", "MONTHLY"]),
+  recipients: z.array(z.string().email("Invalid email address")).min(1, "At least one recipient is required").max(10),
+});

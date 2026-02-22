@@ -57,6 +57,9 @@ export default async function PropertyDetailPage({
               {address}
             </p>
           )}
+          <p className="mt-1 text-xs text-muted-foreground">
+            ID: <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{propertyId}</code>
+          </p>
         </div>
         <Button variant="outline" size="sm" asChild>
           <Link href={`/admin/customers/${orgId}/properties/${propertyId}/edit`}>

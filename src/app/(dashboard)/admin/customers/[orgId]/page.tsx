@@ -131,6 +131,9 @@ export default async function CustomerDetailPage({
                     <Building2 className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="font-medium">{property.name}</p>
+                      <p className="font-mono text-[10px] text-muted-foreground/60">
+                        ID: {property.id}
+                      </p>
                       {(property.address || property.city) && (
                         <p className="text-sm text-muted-foreground">
                           {[property.address, property.city, property.state]
