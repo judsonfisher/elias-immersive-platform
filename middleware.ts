@@ -23,9 +23,14 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // On HTTPS (production), Auth.js v5 sets cookies with __Secure- prefix.
+  // getToken defaults secureCookie to false, so we must detect HTTPS and pass it.
+  const secureCookie = req.nextUrl.protocol === "https:";
+
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    secureCookie,
   });
   const isLoggedIn = !!token;
 
