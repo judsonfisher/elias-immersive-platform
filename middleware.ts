@@ -1,33 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
-
-// Lightweight middleware that decodes the JWT session token directly
-// instead of importing the full auth config (which pulls in Prisma/bcrypt
-// and exceeds the Vercel Edge Function size limit).
-
-const SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || ""
-);
-
-async function getToken(req: NextRequest) {
-  // Auth.js v5 stores the session in a cookie named
-  // __Secure-authjs.session-token (production) or authjs.session-token (dev)
-  const secureCookie = req.cookies.get("__Secure-authjs.session-token");
-  const devCookie = req.cookies.get("authjs.session-token");
-  const tokenValue = secureCookie?.value || devCookie?.value;
-
-  if (!tokenValue) return null;
-
-  try {
-    const { payload } = await jwtVerify(tokenValue, SECRET, {
-      algorithms: ["HS256"],
-    });
-    return payload as { role?: string; email?: string };
-  } catch {
-    return null;
-  }
-}
+import { getToken } from "next-auth/jwt";
 
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -50,7 +23,10 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken(req);
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  });
   const isLoggedIn = !!token;
 
   // Redirect logged-in users away from login page
